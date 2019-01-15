@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+    <link rel="stylesheet" type="text/css" href="../css/styles.css"/>
+    <title>Лабораторная 2</title>
+</h:head>
+<h:body>
+    <div class="container">
+        <header id="header" class="contentBlock">
+            <ul class="about">
+                <li><span class="name">Толстов Даниил</span></li>
+                <li><span class="group">P3200</span></li>
+                <li><span class="variant">Вариант 18012</span></li>
+
+            </ul>
+        </header>
+        <main id="main" class="contentBlock">
+            <div id="form-and-grid">
+                <h:form id="xyr-form" name="xyr" method="post">
+                    <br/>
+
+                    <div id="x-block">
+                        <span class="enter-x"> Выберите координату Х</span>
+                        <p:spinner id="x-input" value="#{results.x}" stepFactor="1"
+                                   min="-3" max="3" required="true">
+                            <!-- required="true" oninvalid="this.setCustomValidity('Выберите X из списка')"
+                                oninput="setCustomValidity('')" -->
+                        </p:spinner>
+                    </div>
+                    <br/>
+
+                    <div id="y-block">
+                        <h:outputText value="Выберите координату Y"/>
+                        <br/>
+                        <p:inputNumber id="y-input" placeholder="Введите координату Y" type="text" value="#{results.y}"
+                                       title="something" name="y-input"
+                                       required="true" validatorMessage="Введите число между -3 и 3">
+                            <f:validateDoubleRange minimum="-3" maximum="3"/>
+                        </p:inputNumber>
+                        <p:message for="y-input" />
+                        <h:outputText value="x:#{results.x} y:#{results.y} r:#{results.r}"/>
+                        <!--oninvalid="this.setCustomValidity('Введите Y')"
+                               oninput="setCustomValidity('')" -->
+                    </div>
+                    <br/>
+                    <div id="r-block">
+                        <span class="enter-r">Выберите масштаб R:</span><br/>
+                        <p:commandLink class="r-buttons" update="" action="#{results.setR(1)}" ajax="true">
+                            <h:outputText value="1"/>
+                        </p:commandLink>
+                        <span class="whitespace">    </span>
+                        <p:commandLink class="r-buttons" update="" action="#{results.setR(2)}" ajax="true">
+                            <h:outputText value="2"/>
+                        </p:commandLink>
+                        <span class="whitespace">    </span>
+                        <p:commandLink class="r-buttons" update="" action="#{results.setR(3)}" ajax="true">
+                            <h:outputText value="3"/>
+                        </p:commandLink>
+                        <span class="whitespace">    </span>
+                        <p:commandLink class="r-buttons" update="" action="#{results.setR(4)}" ajax="true">
+                            <h:outputText value="4"/>
+                        </p:commandLink>
+                        <span class="whitespace">    </span>
+                        <p:commandLink class="r-buttons" update="" action="#{results.setR(5)}" ajax="true">
+                            <h:outputText value="5"/>
+                        </p:commandLink>
+                        <br/>
+                        <br/>
+                        <p:commandButton value="Check" action="#{results.insertResult}" validateClient="true" update="xyr-form table"/>
+                    </div>
+                    <br/>
+                </h:form>
+                <div id="canvas-frame">
+                    <canvas id="grid"></canvas>
+                </div>
+                <p:dataTable id="table" var="result" value="#{results.cachedResults}">
+                    <p:column headerText="Результат">
+                        <h:outputText value="#{result.match}"/>
+                    </p:column>
+
+                    <p:column headerText="Коор. X">
+                        <h:outputText value="#{result.x}"/>
+                    </p:column>
+
+                    <p:column headerText="Коор. Y">
+                        <h:outputText value="#{result.y}"/>
+                    </p:column>
+
+                    <p:column headerText="Значение R">
+                        <h:outputText value="#{result.r}"/>
+                    </p:column>
+                </p:dataTable>
+            </div>
+        </main>
+    </div>
+    <script type="text/javascript" src="../js/javascript.js"/>
+</h:body>
+</html>
