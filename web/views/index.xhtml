@@ -22,7 +22,7 @@
         </header>
         <main id="main" class="contentBlock">
             <div id="form-and-grid">
-                <h:form id="xyr-form" name="xyr" method="post">
+                <h:form prependId="false" id="xyr-form" name="xyr" method="post">
                     <br/>
 
                     <div id="x-block">
@@ -51,54 +51,86 @@
                     <br/>
                     <div id="r-block">
                         <span class="enter-r">Выберите масштаб R:</span><br/>
-                        <p:commandLink class="r-buttons" update="" action="#{results.setR(1)}" ajax="true">
+                        <p:commandLink  class="r-buttons" oncomplete="redrawCanvasWithRegardToCurrentR()" action="#{results.setR(1)}" ajax="true" update="rValue">
                             <h:outputText value="1"/>
                         </p:commandLink>
                         <span class="whitespace">    </span>
-                        <p:commandLink class="r-buttons" update="" action="#{results.setR(2)}" ajax="true">
+                        <p:commandLink class="r-buttons"  oncomplete="redrawCanvasWithRegardToCurrentR()" action="#{results.setR(2)}" ajax="true" update="rValue">
                             <h:outputText value="2"/>
                         </p:commandLink>
                         <span class="whitespace">    </span>
-                        <p:commandLink class="r-buttons" update="" action="#{results.setR(3)}" ajax="true">
+                        <p:commandLink class="r-buttons"  oncomplete="redrawCanvasWithRegardToCurrentR()" action="#{results.setR(3)}" ajax="true" update="rValue">
                             <h:outputText value="3"/>
                         </p:commandLink>
                         <span class="whitespace">    </span>
-                        <p:commandLink class="r-buttons" update="" action="#{results.setR(4)}" ajax="true">
+                        <p:commandLink class="r-buttons"  oncomplete="redrawCanvasWithRegardToCurrentR()" action="#{results.setR(4)}" ajax="true" update="rValue">
                             <h:outputText value="4"/>
                         </p:commandLink>
                         <span class="whitespace">    </span>
-                        <p:commandLink class="r-buttons" update="" action="#{results.setR(5)}" ajax="true">
+                        <p:commandLink class="r-buttons"  oncomplete="redrawCanvasWithRegardToCurrentR()" action="#{results.setR(5)}" ajax="true" update="rValue">
                             <h:outputText value="5"/>
                         </p:commandLink>
                         <br/>
                         <br/>
-                        <p:commandButton value="Check" action="#{results.insertResult}" validateClient="true" update="xyr-form table"/>
+                        <p:commandButton oncomplete="drawPointFromSubmitButton()" id="mainButton" value="Check" action="#{results.insertResult}" validateClient="true" update="xyr-form table rValue xValue yValue"/>
                     </div>
                     <br/>
+                </h:form>
+                <h:form prependId="false" id="hiddenForm" style="display:none;" >
+                    <p:inputText id="jsonInput" name="jsonInput" value="#{results.jsonForJs}"/><!-- !!!!!!!!!it may be not updated-->
+                    <p:inputText id="rValue" name="rValue" value="#{results.r}" /> <!-- !!!!!!!!!it may be not updated-->
+                    <p:inputText id="xValue" name="xValue" value="#{results.x}" /> <!-- !!!!!!!!!it may be not updated-->
+                    <p:inputText id="yValue" name="yValue" value="#{results.y}" /> <!-- !!!!!!!!!it may be not updated-->
+                    <p:inputText id="matchValue" name="matchValue" value="#{results.match}" /> <!-- !!!!!!!!!it may be not updated-->
+                    <p:commandButton id="hiddenButton" action="#{results.sendResultFromJson()}" update="table"/>
                 </h:form>
                 <div id="canvas-frame">
                     <canvas id="grid"></canvas>
                 </div>
-                <p:dataTable id="table" var="result" value="#{results.cachedResults}">
-                    <p:column headerText="Результат">
-                        <h:outputText value="#{result.match}"/>
-                    </p:column>
-
-                    <p:column headerText="Коор. X">
-                        <h:outputText value="#{result.x}"/>
-                    </p:column>
-
-                    <p:column headerText="Коор. Y">
-                        <h:outputText value="#{result.y}"/>
-                    </p:column>
-
-                    <p:column headerText="Значение R">
-                        <h:outputText value="#{result.r}"/>
-                    </p:column>
-                </p:dataTable>
             </div>
+            <p:dataTable id="table" var="result" value="#{results.cachedResults}">
+                <p:column headerText="Результат">
+                    <h:outputText value="#{result.match}"/>
+                </p:column>
+
+                <p:column headerText="Коор. X">
+                    <h:outputText value="#{result.x}"/>
+                </p:column>
+
+                <p:column headerText="Коор. Y">
+                    <h:outputText value="#{result.y}"/>
+                </p:column>
+
+                <p:column headerText="Значение R">
+                    <h:outputText value="#{result.r}"/>
+                </p:column>
+            </p:dataTable>
         </main>
     </div>
     <script type="text/javascript" src="../js/javascript.js"/>
 </h:body>
 </html>
+<!--
+
+создаем невидимую форму с невидимой кнопкой и текстовым полем джсоном. DONE Джсом пихаем в
+текст инпут джсон. потом тыкаем кнопку. кнопка вызывает метод который парсит этот джсон в
+резалт и отправляет на сервер
+
+/////////
+<h:form id="poi-form" styleClass="invisible">
+<input type="text" id="poiemail" name="poiemail" />
+<h:commandButton action="#{userBean.updateData()}" id="miAwesomeButton" value="I'm clicked by javascript"/>
+</h:form>
+
+        function handleEmailResponse(resp) {
+        document.getElementById('poiemail').value = 'usersNewEmailValue';
+        document.getElementById('poi-form:miAwesomeButton').click();
+        }
+
+        public String updateData() {
+        HttpServletRequest request = (HttpServletRequest)FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        this.email= request.getParameter("poiemail");
+        return "redirectURL";
+
+        }
+-->

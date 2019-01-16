@@ -1,10 +1,14 @@
 // TODO СДЕЛАТЬ АЙДИ У СЕССИЙ
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,15 +16,18 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @ManagedBean(name = "results")
 @SessionScoped
 public class Results implements Serializable {
     private List<ResultRow> cachedResults = new LinkedList<ResultRow>();
+    private List<Map<String, String>> resultsAsMapForJs;
     private double x;
     private double y;
-    private double r;
+    private double r = 3;
     private boolean match;
+    private String jsonForJs;
     private boolean debugNotFucked = true;
     private final String sessionId = FacesContext.getCurrentInstance().getExternalContext()
             .getSessionId(false);
@@ -82,6 +89,17 @@ public class Results implements Serializable {
             }
             debugNotFucked = false;
         }
+    }
+
+    public void sendResultFromJson(){
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> coorsMap = new Gson().fromJson(jsonForJs, type);
+        String newX = coorsMap.get("x-input");
+        String newY = coorsMap.get("y-input");
+        x = Double.valueOf(newX);
+        y = Double.valueOf(newY);
+        insertResult();
+
 
     }
 
@@ -170,5 +188,13 @@ public class Results implements Serializable {
 
     public void setCachedResults(List<ResultRow> cachedResults) {
         this.cachedResults = cachedResults;
+    }
+
+    public String getJsonForJs() {
+        return jsonForJs;
+    }
+
+    public void setJsonForJs(String jsonForJs) {
+        this.jsonForJs = jsonForJs;
     }
 }

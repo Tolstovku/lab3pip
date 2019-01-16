@@ -179,3 +179,10 @@ input[type="submit"]{
     height: 50px;
 }
 
+
+
+#form-and-grid {
+    display:block;
+    width: 900px;
+    height: 450px;
+}

@@ -1,3 +1,4 @@
+let dotsArray = [];
 let form = document.getElementById("xyr-form");
 let canvas = document.getElementById("grid");
 canvas.addEventListener("click", function () {
@@ -6,14 +7,27 @@ canvas.addEventListener("click", function () {
 // form.addEventListener("input", validateX);
 // form.addEventListener("submit", validateX);
 // form.addEventListener("submit", submit);
-[...form.getElementsByClassName("r-buttons")].forEach(element => element.addEventListener("input", checkR));
-let dotsArray = [];
-// window.onload = getSessionData;
+// [...form.getElementsByClassName("r-buttons")].forEach(element => element.addEventListener("click", redrawCanvasWithRegardToCurrentR));
+// let mainbutton = document.getElementById("mainButton");
+// mainbutton.addEventListener("complete", drawPointFromSubmitButton);
 
+// document.getElementById("rValue").addEventListener("change", redrawCanvasWithRegardToCurrentR); // NOT SURE !!!!!!!!!!!!
+window.onload = getTableData;
 
-function checkR(){
-    drawCanvas(canvas, form.elements["r-buttons"].value)
+function drawPointFromSubmitButton() {
+    let x = document.getElementById("xValue").value;
+    let y = document.getElementById("yValue").value;
+    let match = document.getElementById("matchValue").value;
+    dotsArray = [...dotsArray, {match: match, x: x, y: y}];
+
+    redrawCanvasWithRegardToCurrentR()
 }
+
+function redrawCanvasWithRegardToCurrentR() {
+    let rValue = document.getElementById("rValue").value;
+    drawCanvas(canvas, rValue)
+}
+
 /* --------- Submit ---------------------------*/
 function submit() {
     event.preventDefault();
@@ -140,12 +154,28 @@ function removeErrorR() {
 
 }
 
+function getTableData() {
+    let rows = Array.from(document.getElementById("table_data").children);
+    let xCell, yCell, matchCell;
+    for (let row of rows) {
+        let cells = Array.from(row.children);
+        if (cells[1] === undefined){
+            break
+        }
+        matchCell = cells[0].innerHTML;
+        xCell = cells[1].innerHTML;
+        yCell = cells[2].innerHTML;
+        dotsArray = [...dotsArray, {match: matchCell, x: xCell, y: yCell}];
+    }
+    redrawCanvasWithRegardToCurrentR();
+}
+
 // function getSessionData() {
 //     fetch("ControllerServlet?getSession=true", {
 //         credentials: "include",
 //     }).then(function (response) {
 //         response.json().then(function (sessionRows) {
-//             if (sessionRows.length > 0) {
+//             if (sessionRows.length > .value0) {
 //                 createTable();
 //                 for (let row in sessionRows) {
 //                     insertRow(sessionRows[row]);
@@ -238,8 +268,8 @@ function drawCanvas(canvas, r) {
         {
             context.beginPath();
             context.moveTo(half_width, half_height);
-            context.ellipse(half_width, half_height, 2*quarter_width, 2*quarter_height, 0, 0, Math.PI  / 2, false);
-            context.rect(half_width, half_height-2*quarter_height, quarter_width, 2*quarter_height);
+            context.ellipse(half_width, half_height, 2 * quarter_width, 2 * quarter_height, 0, 0, Math.PI / 2, false);
+            context.rect(half_width, half_height - 2 * quarter_height, quarter_width, 2 * quarter_height);
 
             context.moveTo(half_width, half_height);
             context.lineTo(half_width, half_height + quarter_height);
@@ -257,7 +287,13 @@ function drawCanvas(canvas, r) {
         dotsArray.forEach(function (dot) {
             var pointer_x = (dot.x / r) * quarter_width * 2;
             var pointer_y = (dot.y / r) * quarter_height * 2;
-
+            if (dot.match == "true") { // FIXME
+                context.strokeStyle = "green";
+                context.fillStyle = "green";
+            } else {
+                context.strokeStyle = "red";
+                context.fillStyle = "red";
+            }
             context.beginPath();
             context.arc(half_width + pointer_x, half_height - pointer_y, 1, 2 * Math.PI, 0);
             context.closePath();
@@ -272,46 +308,52 @@ function canvasListener(canvas) {
     let width = canvas.width;
     let height = canvas.height;
 
-    let r = new FormData(form).get("r-buttons");
-    if (r !== null) {
+    // TODO check r value
+    let rValue = document.getElementById("rValue").value;
+    alert(rValue);
+    if (rValue != "0.0" && rValue !== null) {
         removeErrorR();
         let posX = event.pageX - canvas.offsetLeft;
         let posY = event.pageY - canvas.offsetTop;
-        let coorX = ((posX - 163) / 130 * r).toFixed(3);
-        let coorY = (-(posY - 139) / 108 * r).toFixed(3);
+        let coorX = ((posX - 163) / 130 * rValue).toFixed(3);
+        let coorY = (-(posY - 139) / 108 * rValue).toFixed(3);
         let formData = new FormData;
         formData.append("x-input", coorX);
         formData.append("y-input", coorY);
-        formData.append("r-buttons", r);
         sendClickCoors(formData, true);
     } else showErrorR();
 }
 
-function sendClickCoors(formData, click) {
-    formData.append("click", click);
+function sendClickCoors(formData) {
+    // formData.append("click", click);
     let formArr = {};
     formData.forEach(function (value, key) {
         formArr[key] = value;
     });
     let formJson = JSON.stringify(formArr);
-    fetch("ControllerServlet", {
-        method: "POST",
-        credentials: "include",
-        body: formJson,
-    })
-        .then(function (response) {
-            response.json().then(function (responseArray) {
-                createTable();
-                insertRow(responseArray);
-                drawCanvas(canvas, responseArray["r"]);
-            })
-        })
-        .catch(function (exception) {
-            alert("Connection error");
-        })
+    document.getElementById("jsonInput").value = formJson;
+    document.getElementById("hiddenButton").click();
+    let rValue = document.getElementById("rValue").value;
+    dotsArray = [...dotsArray, {x: formArr["x-input"], y: formArr["y-input"]}];
+
+    drawCanvas(canvas, rValue);
+
+
+    // fetch("ControllerServlet", {
+    //     method: "POST",
+    //     credentials: "include",
+    //     body: formJson,
+    // })
+    //     .then(function (response) {
+    //         response.json().then(function (responseArray) {
+    //             createTable();
+    //             insertRow(responseArray);
+    //             drawCanvas(canvas, responseArray["r"]);
+    //         })
+    //     })
+    //     .catch(function (exception) {
+    //         alert("Connection error");
+    //     })
 }
 
-document.querySelectorAll(".fuck").forEach(function (a) {
-    alert("fuck");
-})
 
